@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+.local/
+test-results/
+playwright-report/
+node_modules/
+.DS_Store

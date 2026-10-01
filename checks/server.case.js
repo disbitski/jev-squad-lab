@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createApp } from '../server.js';
+import { request } from 'node:http';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createProvider } from '../lib/provider.js';
+
+test('local server blocks cross-origin mutation, secrets and arbitrary files', async t => {
+  const root = mkdtempSync(join(tmpdir(), 'jev-http-'));
+  t.after(() => rmSync(root, { recursive: true }));
+  const provider = createProvider(root, { TYPESAFE_API_KEY: 'private-http-fixture-key' });
+  const server = createApp({ provider }); t.after(() => server.close()); await new Promise((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve); });
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const get = path => fetch(base + path);
+  for (const path of ['/.env', '/package.json', '/.local/usage.json', '/lib/provider.js', '/..%2f.env']) assert.equal((await get(path)).status, 404);
+  assert.equal((await fetch(base + '/api/config', { headers: { Origin: 'https://evil.example' } })).status, 403);
+  const badHostStatus = await new Promise((resolve, reject) => { const req = request(base + '/api/config', { headers: { Host: 'evil.example' } }, res => { res.resume(); resolve(res.statusCode); }); req.on('error', reject); req.end(); });
+  assert.equal(badHostStatus, 403);
+  const config = await (await get('/api/config')).json(); assert.equal(JSON.stringify(config).includes('private-http-fixture-key'), false);
+  for (const series of ['../usage', '/etc/passwd', '.env', 'x/y']) assert.equal((await get(`/api/results?series=${encodeURIComponent(series)}`)).status, 400);
+  assert.equal((await get('/api/evaluations')).status, 200);
+  assert.equal((await fetch(base + '/api/run', { method: 'POST', body: '{}' })).status, 403);
+  const post = (path, data) => fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Lab-Token': config.csrf }, body: JSON.stringify(data) });
+  assert.equal((await post('/api/run', { scenario: 'crossing', seed: 41, controller: 'fake' })).status, 400);
+  assert.equal((await post('/api/run', { scenario: 'crossing', seed: 41, controller: 'rules' })).status, 200);
+  assert.equal((await post('/api/control', { action: 'pause' })).status, 200);
+  assert.equal((await fetch(base, { method: 'HEAD' })).status, 200);
+});

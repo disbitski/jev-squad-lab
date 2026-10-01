@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Watch recorded tactical battles and inspect a 45-run comparison of local Nimble and transparent rules. No live inference.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'">
+  <title>JEV Squad Lab | Battle Replays</title>
+  <link rel="icon" href="./assets/defender.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./vendor/phaser.js"></script>
+  <script defer src="./vendor/lucide.js"></script>
+  <script type="module" src="./viewer.js"></script>
+</head>
+<body>
+  <header class="masthead"><div><p class="eyebrow">REAL WORLD AI LAB</p><h1>JEV Squad Lab</h1><p class="subtitle">Nimble + transparent rules</p></div><nav aria-label="Project links"><span class="badge">Recorded battles</span><a href="https://github.com/disbitski/jev-squad-lab">Source &amp; Setup</a><a href="https://github.com/disbitski/real-world-ai-lab/blob/main/field-notes/2026-10-01-warcraft-jev-nimble.md">Field Note</a></nav></header>
+  <main>
+    <div class="tabs" role="tablist" aria-label="Lab views"><button id="replay-tab" role="tab" aria-selected="true" aria-controls="replay-view">Battle Replays</button><button id="results-tab" role="tab" aria-selected="false" aria-controls="results-view" tabindex="-1">Results <span>45</span></button></div>
+    <p id="error" role="alert" hidden></p>
+    <section id="replay-view" role="tabpanel" aria-labelledby="replay-tab">
+      <div class="recording-bar"><label for="recording">Recording</label><select id="recording" disabled><option>Loading recordings...</option></select><a id="download" class="icon-link" download title="Download reviewed replay JSON" aria-label="Download reviewed replay JSON"><i data-lucide="download"></i></a></div>
+      <div class="battle-grid">
+        <div class="battle-main"><div class="mission-header"><div><h2 id="mission-title">Loading battlefield</h2><p id="objective"></p></div><span id="outcome" class="badge"></span></div>
+          <div id="battlefield" aria-label="Recorded battlefield with cyan friendly units and coral enemy units" role="img"></div>
+          <div class="transport"><button id="play" class="icon-button" disabled aria-label="Play replay" title="Play replay"><i data-lucide="play"></i></button><output id="clock">0.00s</output><input id="scrub" aria-label="Replay position" type="range" min="0" max="1" step="0.01" value="0" disabled><span id="duration"></span><select id="speed" aria-label="Playback speed"><option value="1">1x</option><option value="2">2x</option><option value="0.5">0.5x</option></select></div>
+          <div id="units" class="units"></div>
+          <div class="run-facts"><h3>Recorded Run</h3><dl id="metrics"></dl><p id="warning" class="warning" hidden></p></div>
+          <details><summary>Model &amp; Recording Identity</summary><pre id="identity"></pre></details>
+        </div>
+        <aside class="evidence" aria-label="Recorded decision evidence"><div class="evidence-heading"><h2>Decision Evidence</h2><span id="decision-source" class="badge">Awaiting first decision</span></div><p id="decision-time"></p><p id="fallback" class="warning" hidden></p><div id="decisions"></div><details><summary>Request &amp; Response</summary><pre id="raw"></pre></details></aside>
+      </div>
+    </section>
+    <section id="results-view" role="tabpanel" aria-labelledby="results-tab" hidden>
+      <div class="results-heading"><div><h2>Frozen Guided Comparison</h2><p>Five paired seeds (71-75) per mission, three controllers. Same map, opponent, physics, and scoring.</p></div><a href="./data/results.csv" download><i data-lucide="download"></i> Results CSV</a></div>
+      <div class="table-scroll"><table><caption>Mission objectives met</caption><thead><tr><th>Mission</th><th>Original Rules</th><th>Tactical Rules</th><th>Guided Nimble</th></tr></thead><tbody id="summary"></tbody></table></div>
+      <p class="result-note">Tactical rules met all 15 objectives. Guided Nimble met 5, all in withdrawal, saving two units per run rather than three. This is a small harness comparison, not a Jev benchmark or a claim of model superiority.</p>
+      <div class="table-scroll"><table><caption>All 45 scored battles</caption><thead><tr><th>Mission</th><th>Seed</th><th>Controller</th><th>Objective</th><th>Survivors</th><th>Time</th><th>Switches</th><th>Fallbacks</th><th>Discards</th><th>Mean Latency</th><th>Input Tokens</th><th>Known API Cost</th><th>Replay</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <details><summary>Frozen Configuration &amp; Evidence Scope</summary><pre id="frozen"></pre></details>
+    </section>
+  </main>
+  <footer>Public playback only. No live battles, model requests, or API spending. Historical Jev and initial Nimble examples are separate from the scored holdout.</footer>
+</body>
+</html>

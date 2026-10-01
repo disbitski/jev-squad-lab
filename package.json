@@ -1,0 +1,35 @@
+{
+  "name": "jev-squad-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "start:background": "node scripts/service.js start",
+    "start:nimble": "node scripts/local.js start",
+    "start:nimble:background": "node scripts/local.js background",
+    "demo:nimble": "node scripts/local.js demo",
+    "evaluate:nimble": "node scripts/local.js evaluate",
+    "report:nimble": "node scripts/report-local.js",
+    "stop": "node scripts/service.js stop",
+    "access:check": "node --env-file-if-exists=.env scripts/check-access.js",
+    "demo:jev": "node --env-file-if-exists=.env scripts/demo.js",
+    "test": "node --test checks/*.case.js",
+    "test:ui": "playwright test",
+    "evaluate:rules": "node scripts/evaluate.js --rules-only",
+    "evaluate": "node --env-file-if-exists=.env scripts/evaluate.js",
+    "check": "npm test && node --check server.js && node --check public/app.js && node --check replay/viewer.js",
+    "replays:export": "node scripts/export-replays.js",
+    "replays:build": "node scripts/build-replays.js",
+    "replays:serve": "node scripts/serve-replays.js",
+    "replays:test": "playwright test --config=playwright.replay.config.js"
+  },
+  "dependencies": {
+    "@typesafe-ai/sdk": "0.6.0",
+    "lucide": "0.468.0",
+    "matter-js": "0.20.0",
+    "phaser": "3.90.0"
+  },
+  "devDependencies": { "@playwright/test": "1.58.2" }
+}
